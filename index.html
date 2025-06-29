@@ -39,6 +39,31 @@
       color: #ffffff; /* White text for the title */
     }
 
+    /* Clear All Button Styles */
+    #headerContainer {
+      position: relative;
+      width: 99%;
+    }
+
+    #clearAllButton {
+      position: absolute;
+      right: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 8px 16px;
+      background-color: #121212;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: background-color 0.3s ease;
+    }
+
+    #clearAllButton:hover {
+      background-color: #b71c1c;
+    }
+
     #shortcuts {
       text-align: center;
       font-size: 1em;
@@ -178,7 +203,10 @@
 
   <div id="mainContainer">
     <!-- Title -->
-    <h1>List Sorter Pro</h1>
+    <div id="headerContainer">
+      <h1>List Sorter Pro</h1>
+      <button id="clearAllButton">Clear All</button>
+    </div>
 
     <!-- Keyboard Shortcuts -->
     <div id="shortcuts">
@@ -257,8 +285,60 @@
     const discardBox = document.getElementById("discardBox");
     const progressPercentage = document.getElementById("progressPercentage");
     const progressFill = document.getElementById("progressFill");
+    const clearAllButton = document.getElementById("clearAllButton");
 
     let parsedList = [];
+
+    // Save state to localStorage
+    function saveToLocalStorage() {
+      const state = {
+        inputBox: inputBox.value,
+        toDoSoon: toDoSoon.value,
+        toDoEventually: toDoEventually.value,
+        bigIdeas: bigIdeas.value,
+        shortlist: shortlist.value,
+        artStuff: artStuff.value,
+        discardBox: discardBox.value
+      };
+      localStorage.setItem('listSorterProState', JSON.stringify(state));
+    }
+
+    // Load state from localStorage
+    function loadFromLocalStorage() {
+      const savedState = localStorage.getItem('listSorterProState');
+      if (savedState) {
+        const state = JSON.parse(savedState);
+        inputBox.value = state.inputBox || '';
+        toDoSoon.value = state.toDoSoon || '';
+        toDoEventually.value = state.toDoEventually || '';
+        bigIdeas.value = state.bigIdeas || '';
+        shortlist.value = state.shortlist || '';
+        artStuff.value = state.artStuff || '';
+        discardBox.value = state.discardBox || '';
+        
+        // Parse the loaded input
+        if (inputBox.value) {
+          parseList();
+        }
+      }
+    }
+
+    // Clear all text boxes
+    function clearAll() {
+      if (confirm('Are you sure you want to clear all text boxes? This action cannot be undone.')) {
+        inputBox.value = '';
+        toDoSoon.value = '';
+        toDoEventually.value = '';
+        bigIdeas.value = '';
+        shortlist.value = '';
+        artStuff.value = '';
+        discardBox.value = '';
+        parsedList = [];
+        currentItem.textContent = "Press \"Start\" or type your list to begin";
+        updateProgress();
+        saveToLocalStorage();
+      }
+    }
 
     // Parse the input list, grouping sub-items with their parent
     function parseList() {
@@ -322,6 +402,7 @@
       updateInputBox();
       showNextItem();
       updateProgress();
+      saveToLocalStorage(); // Save after sorting
     }
 
     // Delete the current item
@@ -333,6 +414,7 @@
         updateInputBox();
         showNextItem();
         updateProgress();
+        saveToLocalStorage(); // Save after deleting
       }
     }
 
@@ -390,6 +472,18 @@
     currentItem.addEventListener("click", () => {
       currentItem.focus();
     });
+
+    // Attach event listeners to clear all button
+    clearAllButton.addEventListener("click", clearAll);
+
+    // Add event listeners to all textareas to save on change
+    const allTextAreas = [inputBox, toDoSoon, toDoEventually, bigIdeas, shortlist, artStuff, discardBox];
+    allTextAreas.forEach(textarea => {
+      textarea.addEventListener("input", saveToLocalStorage);
+    });
+
+    // Load saved state on page load
+    loadFromLocalStorage();
   </script>
 
 </body>
