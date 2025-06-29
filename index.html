@@ -183,11 +183,11 @@
     <!-- Keyboard Shortcuts -->
     <div id="shortcuts">
       Keyboard Shortcuts: 
-      <strong>S</strong> (To Do Soon), 
+      <strong>D</strong> (To Do Soon), 
       <strong>E</strong> (Eventually), 
-      <strong>I</strong> (Big Ideas), 
-      <strong>L</strong> (Shortlist), 
+      <strong>B</strong> (Big Ideas), 
       <strong>A</strong> (Art Stuff), 
+      <strong>S</strong> (Shortlist), 
       <strong>Backspace</strong> (Delete)
     </div>
 
@@ -210,17 +210,17 @@
     <!-- Categories -->
     <div id="categories">
       <div class="category">
-        <label for="toDoSoon">To-Do Soon ⏰ (O)</label>
+        <label for="toDoSoon">To-Do Soon ⏰ (D)</label>
         <textarea id="toDoSoon" class="categoryBox" placeholder="To-Do Soon ⏰"></textarea>
       </div>
 
       <div class="category">
-        <label for="toDoEventually">To-Do Eventually ⌚️ (N)</label>
+        <label for="toDoEventually">To-Do Eventually ⌚️ (E)</label>
         <textarea id="toDoEventually" class="categoryBox" placeholder="To-Do Eventually ⌚️"></textarea>
       </div>
 
       <div class="category">
-        <label for="bigIdeas">🤯 Big Ideas Megalist (I)</label>
+        <label for="bigIdeas">🤯 Big Ideas Megalist (B)</label>
         <textarea id="bigIdeas" class="categoryBox" placeholder="🤯 Big Ideas Megalist"></textarea>
       </div>
       
@@ -230,7 +230,7 @@
       </div>
       
       <div class="category">
-        <label for="shortlist">Shortlist (L)</label>
+        <label for="shortlist">Shortlist (S)</label>
         <textarea id="shortlist" class="categoryBox" placeholder="Shortlist"></textarea>
       </div>
     </div>
@@ -366,13 +366,13 @@
     document.addEventListener("keydown", (event) => {
       // Ensure the current item div is focused
       if (document.activeElement === currentItem && parsedList.length > 0) {
-        if (event.key === "o") {
+        if (event.key === "d") {
           sortCurrentItem("soon");
-        } else if (event.key === "n") {
+        } else if (event.key === "e") {
           sortCurrentItem("eventually");
-        } else if (event.key === "i") {
+        } else if (event.key === "b") {
           sortCurrentItem("ideas");
-        } else if (event.key === "l") {
+        } else if (event.key === "s") {
           sortCurrentItem("shortlist");
         } else if (event.key === "a") {
           sortCurrentItem("art");
