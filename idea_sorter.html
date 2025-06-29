@@ -1,0 +1,346 @@
+<!--
+
+    Ideas:
+        - This could eventually replace other notes apps entirely - a highly opinionated, GTD-focused notes app (don't try to beat Obsidian/Apple Notes for journaling, they are already great for that).
+        - It could have a simple shortcut to pull up a text box to insert an idea into the idea log from anywhere, and hit Enter and it goes away
+        - I could even hit a shortcut or button to immediately sort it into a bin, reducing work at end of the week if I have an extra second to think about it
+        - So that I can blindly copy To Do Soon in and have less things on Shortlist, I should have even more buckets, prob even more To Do lists - namely a travel one since that comes up a lot, maybe also a finance tasks one, and a Baskl one
+        - There's two bugs in the progress bar - 1) it updates only when you process an event, not if you manually adjust one of the boxes, and 2) it's clearly based on the # of total lines, not on the # of tasks (i.e. a task with 10 subtasks is 11 tasks in terms of the %)
+
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>List Sorter Pro</title>
+  <style>
+    /* General Styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background-color: #121212; /* Dark background */
+      color: #e0e0e0; /* Light text */
+    }
+
+    h1 {
+      text-align: center;
+      margin: 10px 0;
+      font-size: 2em;
+      color: #ffffff; /* White text for the title */
+    }
+
+    #shortcuts {
+      text-align: center;
+      font-size: 1em;
+      margin-bottom: 10px;
+      color: #b0b0b0; /* Slightly dimmed text for shortcuts */
+    }
+
+    #progressContainer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 5px auto; /* Reduced margin */
+      width: 90%;
+      height: 20px; /* Reduced height of the progress bar container */
+    }
+
+    #progressPercentage {
+      font-size: 0.9em;
+      margin-right: 10px;
+      color: #e0e0e0;
+    }
+
+    #progressBar {
+      flex: 1;
+      height: 8px; /* Smaller height for the progress bar */
+      background-color: #333; /* Background of the bar */
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative; /* Ensure child (#progressFill) aligns properly */
+    }
+
+    #progressFill {
+      height: 100%; /* Fill the progress bar from the top */
+      width: 0%; /* Initial progress */
+      background-color: #4caf50; /* Green progress bar */
+      transition: width 0.3s ease; /* Smooth progress animation */
+    }
+
+    #container {
+      display: flex;
+      flex: 1;
+      padding: 10px;
+    }
+
+    textarea, div {
+      border: 1px solid #333; /* Darker border for dark mode */
+      border-radius: 5px;
+      padding: 10px;
+      margin: 5px;
+      background-color: #1e1e1e; /* Darker background for text areas */
+      color: #e0e0e0; /* Light text for readability */
+    }
+
+    textarea {
+      width: 100%;
+      resize: none;
+    }
+
+    #inputBox {
+      flex: 1;
+      height: 100%;
+    }
+
+    #currentItem {
+      flex: 2;
+      font-size: 1.5em;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: left;
+      background-color: #292929; /* Slightly lighter than background */
+      height: 100%;
+      cursor: pointer;
+      white-space: pre-wrap; /* Ensures proper rendering of newlines */
+    }
+
+    #categories {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      padding: 10px;
+    }
+
+    .category {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      flex: 1;
+      margin: 0 5px;
+    }
+
+    .category label {
+      font-size: 0.9em;
+      margin-bottom: 5px;
+      color: #b0b0b0; /* Label text slightly dimmed */
+    }
+
+    .category textarea {
+      width: 100%;
+      height: 60px;
+      overflow-y: auto;
+    }
+
+    footer {
+      text-align: center;
+      padding: 10px;
+      background: #1e1e1e; /* Matches the text areas */
+      font-size: 0.9em;
+      color: #b0b0b0; /* Dimmed footer text */
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Title -->
+  <h1>List Sorter Pro</h1>
+
+  <!-- Keyboard Shortcuts -->
+  <div id="shortcuts">
+    Keyboard Shortcuts: 
+    <strong>S</strong> (To Do Soon), 
+    <strong>E</strong> (Eventually), 
+    <strong>I</strong> (Big Ideas), 
+    <strong>L</strong> (Shortlist), 
+    <strong>Backspace</strong> (Delete)
+  </div>
+
+  <!-- Progress Bar -->
+  <div id="progressContainer">
+    <span id="progressPercentage">0.0%</span>
+    <div id="progressBar">
+      <div id="progressFill"></div>
+    </div>
+  </div>
+
+  <div id="container">
+    <!-- Input List -->
+    <textarea id="inputBox" placeholder="Paste your list here..."></textarea>
+
+    <!-- Current Item -->
+    <div id="currentItem" tabindex="0">Press "Start" or type your list to begin</div>
+  </div>
+
+  <!-- Categories -->
+  <div id="categories">
+    <div class="category">
+      <label for="toDoSoon">To Do Soon (O)</label>
+      <textarea id="toDoSoon" class="categoryBox" placeholder="To Do Soon"></textarea>
+    </div>
+
+    <div class="category">
+      <label for="toDoEventually">Eventually (N)</label>
+      <textarea id="toDoEventually" class="categoryBox" placeholder="Eventually"></textarea>
+    </div>
+
+    <div class="category">
+      <label for="bigIdeas">Big Ideas (I)</label>
+      <textarea id="bigIdeas" class="categoryBox" placeholder="Big Ideas"></textarea>
+    </div>
+
+    <div class="category">
+      <label for="shortlist">Shortlist (L)</label>
+      <textarea id="shortlist" class="categoryBox" placeholder="Shortlist"></textarea>
+    </div>
+  </div>
+
+  <footer>
+    Designed to help you organize your lists effectively!
+  </footer>
+
+  <script>
+    const inputBox = document.getElementById("inputBox");
+    const currentItem = document.getElementById("currentItem");
+    const toDoSoon = document.getElementById("toDoSoon");
+    const toDoEventually = document.getElementById("toDoEventually");
+    const bigIdeas = document.getElementById("bigIdeas");
+    const shortlist = document.getElementById("shortlist");
+    const progressPercentage = document.getElementById("progressPercentage");
+    const progressFill = document.getElementById("progressFill");
+
+    let parsedList = [];
+
+    // Parse the input list, grouping sub-items with their parent
+    function parseList() {
+      const rawList = inputBox.value.split("\n");
+      parsedList = [];
+      let currentParent = null;
+
+      rawList.forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return; // Skip empty lines
+
+        // Check if it's a sub-item (indented)
+        if (line.startsWith(" ") || line.startsWith("\t")) {
+          if (currentParent) {
+            currentParent.subItems.push(trimmed.replace(/^\[.\] /, "")); // Strip "[ ] " or "[x] "
+          }
+        } else {
+          // It's a parent item
+          currentParent = {
+            text: trimmed.replace(/^\[.\] /, ""), // Strip "[ ] " or "[x] "
+            subItems: []
+          };
+          parsedList.push(currentParent);
+        }
+      });
+
+      showNextItem();
+      updateProgress();
+    }
+
+    // Show the next parent item and its sub-items
+    function showNextItem() {
+      if (parsedList.length > 0) {
+        const current = parsedList[0];
+        const subItems = current.subItems.map(sub => `  - ${sub}`).join("\n");
+        currentItem.innerHTML = current.text + (subItems ? "<br>" + subItems.replace(/\n/g, "<br>") : "");
+      } else {
+        currentItem.textContent = "All items sorted!";
+      }
+    }
+
+    // Sort the current item into a category
+    function sortCurrentItem(category) {
+      if (parsedList.length === 0) return;
+
+      const current = parsedList.shift(); // Remove the first item
+      const fullText = current.text + (current.subItems.length ? "\n" + current.subItems.map(sub => `  - ${sub}`).join("\n") : "");
+
+      if (category === "soon") {
+        toDoSoon.value += fullText + "\n";
+      } else if (category === "eventually") {
+        toDoEventually.value += fullText + "\n";
+      } else if (category === "ideas") {
+        bigIdeas.value += fullText + "\n";
+      } else if (category === "shortlist") {
+        shortlist.value += fullText + "\n";
+      }
+
+      updateInputBox();
+      showNextItem();
+      updateProgress();
+    }
+
+    // Delete the current item
+    function deleteCurrentItem() {
+      if (parsedList.length > 0) {
+        parsedList.shift(); // Remove the first item
+        updateInputBox();
+        showNextItem();
+        updateProgress();
+      }
+    }
+
+    // Update the input box to reflect the remaining unsorted items
+    function updateInputBox() {
+      const remainingItems = parsedList.map(parent => {
+        const subItems = parent.subItems.map(sub => `  - ${sub}`).join("\n");
+        return parent.text + (subItems ? "\n" + subItems : "");
+      });
+      inputBox.value = remainingItems.join("\n");
+    }
+
+    // Update the progress bar
+    function updateProgress() {
+      const totalSorted =
+        toDoSoon.value.split("\n").filter(Boolean).length +
+        toDoEventually.value.split("\n").filter(Boolean).length +
+        bigIdeas.value.split("\n").filter(Boolean).length +
+        shortlist.value.split("\n").filter(Boolean).length;
+
+      const totalTasks = totalSorted + parsedList.length;
+
+      const progress = totalTasks > 0 ? (totalSorted / totalTasks) * 100 : 0;
+      progressPercentage.textContent = `${progress.toFixed(1)}%`;
+      progressFill.style.width = `${progress}%`;
+    }
+
+    // Handle keypress events
+    document.addEventListener("keydown", (event) => {
+      // Ensure the current item div is focused
+      if (document.activeElement === currentItem && parsedList.length > 0) {
+        if (event.key === "o") {
+          sortCurrentItem("soon");
+        } else if (event.key === "n") {
+          sortCurrentItem("eventually");
+        } else if (event.key === "i") {
+          sortCurrentItem("ideas");
+        } else if (event.key === "l") {
+          sortCurrentItem("shortlist");
+        } else if (event.key === "Backspace") {
+          event.preventDefault(); // Prevent default browser behavior
+          deleteCurrentItem();
+        }
+      }
+    });
+
+    // Monitor the input box for changes
+    inputBox.addEventListener("input", parseList);
+
+    // Allow focusing on the "currentItem" div
+    currentItem.addEventListener("click", () => {
+      currentItem.focus();
+    });
+  </script>
+
+</body>
+</html>
