@@ -233,6 +233,7 @@
       <strong>B</strong> (Big Ideas), 
       <strong>A</strong> (Art Stuff), 
       <strong>S</strong> (Shortlist), 
+      <strong>X</strong> (Cut to Clipboard), 
       <strong>Backspace</strong> (Delete)
     </div>
 
@@ -435,6 +436,52 @@
       }
     }
 
+    // Cut the current item to clipboard
+    function cutCurrentItem() {
+      if (parsedList.length > 0) {
+        const current = parsedList.shift(); // Remove the first item
+        const fullText = current.text + (current.subItems.length ? "\n" + current.subItems.map(sub => `  - ${sub}`).join("\n") : "");
+        
+        // Copy to clipboard
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(fullText).then(() => {
+            console.log('Item cut to clipboard successfully');
+          }).catch(err => {
+            console.error('Failed to copy to clipboard:', err);
+            // Fallback: try the older method
+            fallbackCopyToClipboard(fullText);
+          });
+        } else {
+          // Fallback for older browsers
+          fallbackCopyToClipboard(fullText);
+        }
+        
+        updateInputBox();
+        showNextItem();
+        updateProgress();
+        saveToLocalStorage(); // Save after cutting
+      }
+    }
+
+    // Fallback method for copying to clipboard
+    function fallbackCopyToClipboard(text) {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        console.log('Item cut to clipboard successfully (fallback method)');
+      } catch (err) {
+        console.error('Fallback copy to clipboard failed:', err);
+      }
+      document.body.removeChild(textArea);
+    }
+
     // Update the input box to reflect the remaining unsorted items
     function updateInputBox() {
       const remainingItems = parsedList.map(parent => {
@@ -475,6 +522,8 @@
           sortCurrentItem("shortlist");
         } else if (event.key === "a") {
           sortCurrentItem("art");
+        } else if (event.key === "x") {
+          cutCurrentItem();
         } else if (event.key === "Backspace") {
           event.preventDefault(); // Prevent default browser behavior
           deleteCurrentItem();
