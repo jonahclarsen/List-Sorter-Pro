@@ -187,6 +187,7 @@
       <strong>E</strong> (Eventually), 
       <strong>I</strong> (Big Ideas), 
       <strong>L</strong> (Shortlist), 
+      <strong>A</strong> (Art Stuff), 
       <strong>Backspace</strong> (Delete)
     </div>
 
@@ -227,6 +228,11 @@
         <label for="shortlist">Shortlist (L)</label>
         <textarea id="shortlist" class="categoryBox" placeholder="Shortlist"></textarea>
       </div>
+
+      <div class="category">
+        <label for="artStuff">🖌️ Art Stuff That Could Be Fun (A)</label>
+        <textarea id="artStuff" class="categoryBox" placeholder="Art Stuff"></textarea>
+      </div>
     </div>
 
     <footer>
@@ -247,6 +253,7 @@
     const toDoEventually = document.getElementById("toDoEventually");
     const bigIdeas = document.getElementById("bigIdeas");
     const shortlist = document.getElementById("shortlist");
+    const artStuff = document.getElementById("artStuff");
     const discardBox = document.getElementById("discardBox");
     const progressPercentage = document.getElementById("progressPercentage");
     const progressFill = document.getElementById("progressFill");
@@ -308,6 +315,8 @@
         bigIdeas.value += fullText + "\n";
       } else if (category === "shortlist") {
         shortlist.value += fullText + "\n";
+      } else if (category === "art") {
+        artStuff.value += fullText + "\n";
       }
 
       updateInputBox();
@@ -343,6 +352,7 @@
         toDoEventually.value.split("\n").filter(Boolean).length +
         bigIdeas.value.split("\n").filter(Boolean).length +
         shortlist.value.split("\n").filter(Boolean).length +
+        artStuff.value.split("\n").filter(Boolean).length +
         discardBox.value.split("\n").filter(Boolean).length;
 
       const totalTasks = totalSorted + parsedList.length;
@@ -364,6 +374,8 @@
           sortCurrentItem("ideas");
         } else if (event.key === "l") {
           sortCurrentItem("shortlist");
+        } else if (event.key === "a") {
+          sortCurrentItem("art");
         } else if (event.key === "Backspace") {
           event.preventDefault(); // Prevent default browser behavior
           deleteCurrentItem();
