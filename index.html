@@ -22,11 +22,14 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
       background-color: #121212; /* Dark background */
       color: #e0e0e0; /* Light text */
+    }
+
+    #mainContainer {
+      display: flex;
+      flex-direction: column;
+      height: 98vh;
     }
 
     h1 {
@@ -146,65 +149,96 @@
       font-size: 0.9em;
       color: #b0b0b0; /* Dimmed footer text */
     }
+
+    /* Additional styles for discard section */
+    #discardSection {
+      width: 99.10%;
+      box-sizing: border-box;
+    }
+    #discardSection label {
+      font-size: 0.9em;
+      margin-bottom: 5px;
+      display: block;
+      color: #b0b0b0;
+    }
+    #discardBox {
+      width: 98%;
+      height: 120px;
+      overflow-y: auto;
+      border: 1px solid #333;
+      border-radius: 5px;
+      padding: 10px;
+      background-color: #1e1e1e;
+      color: #999;
+      resize: vertical;
+    }
   </style>
-</head>
+  </head>
 <body>
 
-  <!-- Title -->
-  <h1>List Sorter Pro</h1>
+  <div id="mainContainer">
+    <!-- Title -->
+    <h1>List Sorter Pro</h1>
 
-  <!-- Keyboard Shortcuts -->
-  <div id="shortcuts">
-    Keyboard Shortcuts: 
-    <strong>S</strong> (To Do Soon), 
-    <strong>E</strong> (Eventually), 
-    <strong>I</strong> (Big Ideas), 
-    <strong>L</strong> (Shortlist), 
-    <strong>Backspace</strong> (Delete)
+    <!-- Keyboard Shortcuts -->
+    <div id="shortcuts">
+      Keyboard Shortcuts: 
+      <strong>S</strong> (To Do Soon), 
+      <strong>E</strong> (Eventually), 
+      <strong>I</strong> (Big Ideas), 
+      <strong>L</strong> (Shortlist), 
+      <strong>Backspace</strong> (Delete)
+    </div>
+
+    <!-- Progress Bar -->
+    <div id="progressContainer">
+      <span id="progressPercentage">0.0%</span>
+      <div id="progressBar">
+        <div id="progressFill"></div>
+      </div>
+    </div>
+
+    <div id="container">
+      <!-- Input List -->
+      <textarea id="inputBox" placeholder="Paste your list here..."></textarea>
+
+      <!-- Current Item -->
+      <div id="currentItem" tabindex="0">Press "Start" or type your list to begin</div>
+    </div>
+
+    <!-- Categories -->
+    <div id="categories">
+      <div class="category">
+        <label for="toDoSoon">To Do Soon (O)</label>
+        <textarea id="toDoSoon" class="categoryBox" placeholder="To Do Soon"></textarea>
+      </div>
+
+      <div class="category">
+        <label for="toDoEventually">Eventually (N)</label>
+        <textarea id="toDoEventually" class="categoryBox" placeholder="Eventually"></textarea>
+      </div>
+
+      <div class="category">
+        <label for="bigIdeas">Big Ideas (I)</label>
+        <textarea id="bigIdeas" class="categoryBox" placeholder="Big Ideas"></textarea>
+      </div>
+
+      <div class="category">
+        <label for="shortlist">Shortlist (L)</label>
+        <textarea id="shortlist" class="categoryBox" placeholder="Shortlist"></textarea>
+      </div>
+    </div>
+
+    <footer>
+      Designed to help you organize your lists effectively!
+    </footer>
   </div>
 
-  <!-- Progress Bar -->
-  <div id="progressContainer">
-    <span id="progressPercentage">0.0%</span>
-    <div id="progressBar">
-      <div id="progressFill"></div>
-    </div>
+  <!-- Discard Section -->
+  <div id="discardSection">
+    <label for="discardBox">Discard</label>
+    <textarea id="discardBox" placeholder="Discarded items..." readonly></textarea>
   </div>
-
-  <div id="container">
-    <!-- Input List -->
-    <textarea id="inputBox" placeholder="Paste your list here..."></textarea>
-
-    <!-- Current Item -->
-    <div id="currentItem" tabindex="0">Press "Start" or type your list to begin</div>
-  </div>
-
-  <!-- Categories -->
-  <div id="categories">
-    <div class="category">
-      <label for="toDoSoon">To Do Soon (O)</label>
-      <textarea id="toDoSoon" class="categoryBox" placeholder="To Do Soon"></textarea>
-    </div>
-
-    <div class="category">
-      <label for="toDoEventually">Eventually (N)</label>
-      <textarea id="toDoEventually" class="categoryBox" placeholder="Eventually"></textarea>
-    </div>
-
-    <div class="category">
-      <label for="bigIdeas">Big Ideas (I)</label>
-      <textarea id="bigIdeas" class="categoryBox" placeholder="Big Ideas"></textarea>
-    </div>
-
-    <div class="category">
-      <label for="shortlist">Shortlist (L)</label>
-      <textarea id="shortlist" class="categoryBox" placeholder="Shortlist"></textarea>
-    </div>
-  </div>
-
-  <footer>
-    Designed to help you organize your lists effectively!
-  </footer>
 
   <script>
     const inputBox = document.getElementById("inputBox");
@@ -213,6 +247,7 @@
     const toDoEventually = document.getElementById("toDoEventually");
     const bigIdeas = document.getElementById("bigIdeas");
     const shortlist = document.getElementById("shortlist");
+    const discardBox = document.getElementById("discardBox");
     const progressPercentage = document.getElementById("progressPercentage");
     const progressFill = document.getElementById("progressFill");
 
@@ -283,7 +318,9 @@
     // Delete the current item
     function deleteCurrentItem() {
       if (parsedList.length > 0) {
-        parsedList.shift(); // Remove the first item
+        const current = parsedList.shift(); // Remove the first item
+        const fullText = current.text + (current.subItems.length ? "\n" + current.subItems.map(sub => `  - ${sub}`).join("\n") : "");
+        discardBox.value += fullText + "\n";
         updateInputBox();
         showNextItem();
         updateProgress();
@@ -305,7 +342,8 @@
         toDoSoon.value.split("\n").filter(Boolean).length +
         toDoEventually.value.split("\n").filter(Boolean).length +
         bigIdeas.value.split("\n").filter(Boolean).length +
-        shortlist.value.split("\n").filter(Boolean).length;
+        shortlist.value.split("\n").filter(Boolean).length +
+        discardBox.value.split("\n").filter(Boolean).length;
 
       const totalTasks = totalSorted + parsedList.length;
 
