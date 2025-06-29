@@ -17,11 +17,14 @@
   <title>List Sorter Pro</title>
   <style>
     /* General Styles */
+    * {
+      box-sizing: border-box; /* Apply to ALL elements */
+    }
+    
     body {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
       background-color: #121212; /* Dark background */
       color: #e0e0e0; /* Light text */
     }
@@ -29,7 +32,8 @@
     #mainContainer {
       display: flex;
       flex-direction: column;
-      height: 98vh;
+      height: 100vh;
+      overflow: hidden; /* Prevent any overflow */
     }
 
     h1 {
@@ -42,12 +46,13 @@
     /* Clear All Button Styles */
     #headerContainer {
       position: relative;
-      width: 99%;
+      width: 100%;
+      padding: 0 20px; /* Add padding instead of reducing width */
     }
 
     #clearAllButton {
       position: absolute;
-      right: 30px;
+      right: 20px;
       top: 50%;
       transform: translateY(-50%);
       padding: 8px 16px;
@@ -93,12 +98,18 @@
       border-radius: 8px;
       overflow: hidden;
       position: relative; /* Ensure child (#progressFill) aligns properly */
+      box-sizing: border-box;
     }
 
     #progressFill {
-      height: 100%; /* Fill the progress bar from the top */
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       width: 0%; /* Initial progress */
       background-color: #4caf50; /* Green progress bar */
+      border-radius: 8px; /* Match parent's border radius */
       transition: width 0.3s ease; /* Smooth progress animation */
     }
 
@@ -106,13 +117,13 @@
       display: flex;
       flex: 1;
       padding: 10px;
+      gap: 10px; /* Use gap instead of margins on children */
     }
 
     textarea, div {
       border: 1px solid #333; /* Darker border for dark mode */
       border-radius: 5px;
       padding: 10px;
-      margin: 5px;
       background-color: #1e1e1e; /* Darker background for text areas */
       color: #e0e0e0; /* Light text for readability */
     }
@@ -120,11 +131,13 @@
     textarea {
       width: 100%;
       resize: none;
+      margin: 0; /* Remove margin to prevent overflow */
     }
 
     #inputBox {
       flex: 1;
       height: 100%;
+      margin: 0; /* Remove default margin */
     }
 
     #currentItem {
@@ -138,6 +151,8 @@
       height: 100%;
       cursor: pointer;
       white-space: pre-wrap; /* Ensures proper rendering of newlines */
+      margin: 0; /* Remove margin */
+      padding: 20px; /* Add padding for content spacing */
     }
 
     #categories {
@@ -145,6 +160,7 @@
       flex-direction: row;
       justify-content: space-between;
       padding: 10px;
+      gap: 10px; /* Use gap instead of margins */
     }
 
     .category {
@@ -152,7 +168,7 @@
       flex-direction: column;
       align-items: flex-start;
       flex: 1;
-      margin: 0 5px;
+      margin: 0; /* Remove margin since parent uses gap */
     }
 
     .category label {
@@ -177,8 +193,8 @@
 
     /* Additional styles for discard section */
     #discardSection {
-      width: 99.10%;
-      box-sizing: border-box;
+      width: 100%;
+      padding: 10px; /* Add padding to match other sections */
     }
     #discardSection label {
       font-size: 0.9em;
@@ -187,7 +203,7 @@
       color: #b0b0b0;
     }
     #discardBox {
-      width: 98%;
+      width: 100%;
       height: 120px;
       overflow-y: auto;
       border: 1px solid #333;
@@ -196,6 +212,7 @@
       background-color: #1e1e1e;
       color: #999;
       resize: vertical;
+      margin: 0; /* Remove any default margin */
     }
   </style>
   </head>
